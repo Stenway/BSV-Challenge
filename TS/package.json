@@ -1,0 +1,45 @@
+{
+  "name": "@stenway/bsv-challenge",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Encode and decode BSV documents in a simple way",
+  "homepage": "https://www.stenway.com",
+  "repository": "github:Stenway/BSV-Challenge",
+  "bugs": {
+    "url": "https://github.com/Stenway/BSV-Challenge/issues"
+  },
+  "exports": "./dist/src/bsv.js",
+  "types": "dist/src/bsv.d.ts",
+  "files": [
+    "/dist/src"
+  ],
+  "engines": {
+    "node": ">=14.16"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src",
+    "test": "tsc && jest --coverage"
+  },
+  "keywords": [
+    "bsv",
+    "wsv",
+    "utf-8",
+    "utf8",
+    "unicode",
+    "csv"
+  ],
+  "author": "Stefan John",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "eslint": "^8.39.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.0.4"
+  }
+}
