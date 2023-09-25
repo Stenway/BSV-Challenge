@@ -1,70 +1,7 @@
 ﻿/* (C) Stefan John / Stenway / Stenway.com / 2023 */
 
-export function joinBytes(bytesArray: Uint8Array[]): Uint8Array {
-	const resultLength = bytesArray.reduce((result, bytes) => result + bytes.length, 0)
-	const result = new Uint8Array(resultLength)
-	let offset = 0
-	for (const bytes of bytesArray) {
-		result.set(bytes, offset)
-		offset += bytes.length
-	}
-	return result
-}
-
-export function splitBytes(bytes: Uint8Array, splitByte: number): Uint8Array[] {
-	const result: Uint8Array[] = []
-	let lastIndex = -1
-	for (;;) {
-		const currentIndex = bytes.indexOf(splitByte, lastIndex+1)
-		if (currentIndex < 0) {
-			const part = bytes.subarray(lastIndex+1)
-			result.push(part)
-			break
-		} else {
-			const part = bytes.subarray(lastIndex+1, currentIndex)
-			lastIndex = currentIndex
-			result.push(part)
-		}
-	}
-	return result
-}
-
-export function isValidUtf16String(str: string): boolean {
-	for (let i=0; i<str.length; i++) {
-		const firstCodeUnit: number = str.charCodeAt(i)
-		if (firstCodeUnit >= 0xD800 && firstCodeUnit <= 0xDFFF) {
-			if (firstCodeUnit >= 0xDC00) { return false }
-			i++
-			if (i >= str.length) { return false }
-			const secondCodeUnit: number = str.charCodeAt(i)
-			if (!(secondCodeUnit >= 0xDC00 && secondCodeUnit <= 0xDFFF)) { return false }
-		}
-	}
-	return true
-}
-
-// ----------------------------------------------------------------------
-
-export function decodeBsv(bytes: Uint8Array): (string | null)[][] {
-	if (bytes.length < 3 || bytes[0] !== 0x42 || bytes[1] !== 0x53 || bytes[2] !== 0x56) {
-		throw new Error(`No valid BSV preamble`)
-	}
-	const decoder = new TextDecoder("utf-8", {fatal: true, ignoreBOM: true})
-	return splitBytes(bytes.subarray(3), 0xFF).map((lineBytes) => lineBytes.length === 0 ? [] :
-		splitBytes(lineBytes, 0xFE).map((valueBytes) => {
-			if (valueBytes.length === 0) { throw new Error(`Invalid BSV value byte sequence`) }
-			if (valueBytes.length === 1) {
-				const firstByte = valueBytes[0]
-				if (firstByte === 0xFD) { return null }
-				else if (firstByte === 0xFC) { return "" }
-			}
-			return decoder.decode(valueBytes)
-		})
-	)
-}
-
 export function encodeBsv(jaggedArray: (string | null)[][]): Uint8Array {
-	const parts: Uint8Array[] = [new Uint8Array([0x42, 0x53, 0x56])]
+	const parts: Uint8Array[] = []
 	const lineBreakByte = new Uint8Array([0xFF])
 	const valueSeparatorByte = new Uint8Array([0xFE])
 	const nullValueByte = new Uint8Array([0xFD])
@@ -81,10 +18,47 @@ export function encodeBsv(jaggedArray: (string | null)[][]): Uint8Array {
 			if (value === null) { parts.push(nullValueByte) }
 			else if (value.length === 0) { parts.push(emptyStringByte) }
 			else {
-				if (isValidUtf16String(value) === false) { throw new Error(`Invalid string value`) }
+				if (!/\p{Surrogate}/u.test(value) === false) { throw new Error(`Invalid string value`) }
 				parts.push(encoder.encode(value))
 			}
 		}
 	}
-	return joinBytes(parts)
+	const result = new Uint8Array(parts.reduce((result, bytes) => result + bytes.length, 0))
+	let offset = 0
+	for (const bytes of parts) {
+		result.set(bytes, offset)
+		offset += bytes.length
+	}
+	return result
+}
+
+export function decodeBsv(bytes: Uint8Array): (string | null)[][] {
+	const decoder = new TextDecoder("utf-8", {fatal: true, ignoreBOM: true})
+	const result: (string | null)[][] = []
+	let currentLine: (string | null)[] = []
+	let lastIndex = -1
+	const indexOfLbOrVs = (lastIndex: number) => {
+		let currentIndex = lastIndex
+		for (;;) {
+			if (currentIndex >= bytes.length) { return -1 }
+			if (bytes[currentIndex] >= 0xFE) { return currentIndex }
+			currentIndex++
+		}
+	}
+	for (;;) {
+		const currentIndex = indexOfLbOrVs(lastIndex+1)
+		const valueBytes = bytes.subarray(lastIndex+1, currentIndex < 0 ? undefined : currentIndex)
+		if (valueBytes.length === 1 && valueBytes[0] === 0xFD) { currentLine.push(null) }
+		else if (valueBytes.length === 1 && valueBytes[0] === 0xFC) { currentLine.push("") }
+		else if (valueBytes.length >= 1) { currentLine.push(decoder.decode(valueBytes)) }
+		else if ((((currentIndex >= 0 && bytes[currentIndex] === 0xFF) || (currentIndex < 0)) && ((lastIndex < 0) || (lastIndex >= 0 && bytes[lastIndex] === 0xFF))) === false) { throw new Error(`Invalid BSV value byte sequence`) }
+		if (currentIndex < 0) { break }
+		else if (currentIndex >= 0 && bytes[currentIndex] === 0xFF) {
+			result.push(currentLine)
+			currentLine = []
+		}
+		lastIndex = currentIndex
+	}
+	result.push(currentLine)
+	return result
 }
