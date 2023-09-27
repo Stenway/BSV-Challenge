@@ -73,14 +73,6 @@ static string?[][] LoadBsv(string filePath) {
 	return DecodeBsv(File.ReadAllBytes(filePath));
 }
 
-static (FileStream, bool) getX(string filePath) {
-	try { return (File.Open(filePath, FileMode.Open, FileAccess.Write), true); }
-	catch (Exception exception) {
-		if (exception is FileNotFoundException) { return (File.Open(filePath, FileMode.CreateNew, FileAccess.Write), false); }
-		else { throw exception; }
-	}
-}
-
 static void AppendBsv(string?[][] jaggedArray, string filePath) {
 	var openFile = () => {
 		try { return (File.Open(filePath, FileMode.Open, FileAccess.Write), true); }

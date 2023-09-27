@@ -1,4 +1,4 @@
-﻿static IEnumerable<byte[]> splitBytes(byte[] bytes, byte splitByte) {
+﻿static IEnumerable<byte[]> SplitBytes(byte[] bytes, byte splitByte) {
 	var lastIndex = -1;
 	for (;;) {
 		var currentIndex = Array.IndexOf(bytes, splitByte, lastIndex+1);
@@ -12,7 +12,7 @@
 	}
 }
 
-static string?[][] decodeBsv(byte[] bytes) {
+static string?[][] DecodeBsv(byte[] bytes) {
 	if (bytes.Length < 3 || bytes[0] != 0x42 || bytes[1] != 0x53 || bytes[2] != 0x56) {
 		throw new Exception("No valid BSV preamble");
 	}
