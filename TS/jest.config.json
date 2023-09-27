@@ -14,5 +14,5 @@
 	"testEnvironment": "node",
 	"roots": ["<rootDir>/tests/", "<rootDir>/src/"],
 	"collectCoverage": true,
-	"collectCoverageFrom": ["src/bsv.ts", "src/bsv-alternatives.ts"]
+	"collectCoverageFrom": ["src/bsv.ts", "src/bsv-alternatives.ts", "src/bsv-io.ts"]
 }

@@ -137,17 +137,16 @@ export function decodeBsv3(bytes) {
 }
 // ----------------------------------------------------------------------
 class BsvUtil {
-    static lineBreakByte = 0b11111111;
-    static valueSeparatorByte = 0b11111110;
-    static nullValueByte = 0b11111101;
-    static emptyStringByte = 0b11111100;
 }
+BsvUtil.lineBreakByte = 0b11111111;
+BsvUtil.valueSeparatorByte = 0b11111110;
+BsvUtil.nullValueByte = 0b11111101;
+BsvUtil.emptyStringByte = 0b11111100;
 export { BsvUtil };
 export class Uint8ArrayBuilder {
-    _buffer;
-    _numBytes = 0;
-    _utf8Encoder = new TextEncoder();
     constructor(initialSize = 4096) {
+        this._numBytes = 0;
+        this._utf8Encoder = new TextEncoder();
         this._buffer = new Uint8Array(initialSize);
     }
     prepare(appendLength) {
@@ -222,9 +221,6 @@ export class InvalidBsvError extends Error {
     }
 }
 export class Uint8ArrayReader {
-    buffer;
-    offset;
-    utf8Decoder;
     constructor(buffer, offset) {
         this.buffer = buffer;
         this.offset = offset;
