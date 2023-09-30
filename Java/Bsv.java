@@ -1,3 +1,5 @@
+/* (C) Stefan John / Stenway / Stenway.com / 2023 */
+
 import java.util.ArrayList;
 import java.util.Objects;
 import java.io.IOException;

@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
 import * as fs from 'fs';
-export function encodeBsv(jaggedArray) { const parts = []; const lineBreakByte = new Uint8Array([0xFF]); const valueSeparatorByte = new Uint8Array([0xFE]); const nullValueByte = new Uint8Array([0xFD]); const emptyStringByte = new Uint8Array([0xFC]); const encoder = new TextEncoder(); let wasFirstLine = true; for (const line of jaggedArray) {
-    if (wasFirstLine === false) {
+export function encodeBsv(jaggedArray) { const parts = []; const lineBreakByte = new Uint8Array([0xFF]); const valueSeparatorByte = new Uint8Array([0xFE]); const nullValueByte = new Uint8Array([0xFD]); const emptyStringByte = new Uint8Array([0xFC]); const encoder = new TextEncoder(); let isFirstLine = true; for (const line of jaggedArray) {
+    if (isFirstLine === false) {
         parts.push(lineBreakByte);
     }
-    wasFirstLine = false;
-    let wasFirstValue = true;
+    isFirstLine = false;
+    let isFirstValue = true;
     for (const value of line) {
-        if (wasFirstValue === false) {
+        if (isFirstValue === false) {
             parts.push(valueSeparatorByte);
         }
-        wasFirstValue = false;
+        isFirstValue = false;
         if (value === null) {
             parts.push(nullValueByte);
         }
@@ -28,16 +28,18 @@ export function encodeBsv(jaggedArray) { const parts = []; const lineBreakByte =
     result.set(bytes, offset);
     offset += bytes.length;
 } return result; }
-export function decodeBsv(bytes) { const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }); const result = []; let currentLine = []; let lastIndex = -1; const indexOfLbOrVs = (lastIndex) => { let currentIndex = lastIndex; for (;;) {
-    if (currentIndex >= bytes.length) {
-        return -1;
+export function decodeBsv(bytes) { const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }); const result = []; let currentLine = []; let currentIndex = -1; for (;;) {
+    const lastIndex = currentIndex;
+    for (;;) {
+        currentIndex++;
+        if (currentIndex >= bytes.length) {
+            currentIndex = -1;
+            break;
+        }
+        if (bytes[currentIndex] >= 0xFE) {
+            break;
+        }
     }
-    if (bytes[currentIndex] >= 0xFE) {
-        return currentIndex;
-    }
-    currentIndex++;
-} }; for (;;) {
-    const currentIndex = indexOfLbOrVs(lastIndex + 1);
     const valueBytes = bytes.subarray(lastIndex + 1, currentIndex < 0 ? undefined : currentIndex);
     if (valueBytes.length === 1 && valueBytes[0] === 0xFD) {
         currentLine.push(null);
@@ -58,7 +60,6 @@ export function decodeBsv(bytes) { const decoder = new TextDecoder("utf-8", { fa
         result.push(currentLine);
         currentLine = [];
     }
-    lastIndex = currentIndex;
 } result.push(currentLine); return result; }
 export function saveBsvSync(jaggedArray, filePath) { fs.writeFileSync(filePath, encodeBsv(jaggedArray)); }
 export function loadBsvSync(filePath) { return decodeBsv(fs.readFileSync(filePath)); }
