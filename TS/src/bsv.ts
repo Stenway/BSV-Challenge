@@ -7,14 +7,14 @@ export function encodeBsv(jaggedArray: (string | null)[][]): Uint8Array {
 	const nullValueByte = new Uint8Array([0xFD]);
 	const emptyStringByte = new Uint8Array([0xFC]);
 	const encoder = new TextEncoder();
-	let wasFirstLine = true;
+	let isFirstLine = true;
 	for (const line of jaggedArray) {
-		if (wasFirstLine === false) { parts.push(lineBreakByte); }
-		wasFirstLine = false;
-		let wasFirstValue = true;
+		if (isFirstLine === false) { parts.push(lineBreakByte); }
+		isFirstLine = false;
+		let isFirstValue = true;
 		for (const value of line) {
-			if (wasFirstValue === false) { parts.push(valueSeparatorByte); }
-			wasFirstValue = false;
+			if (isFirstValue === false) { parts.push(valueSeparatorByte); }
+			isFirstValue = false;
 			if (value === null) { parts.push(nullValueByte); }
 			else if (value.length === 0) { parts.push(emptyStringByte); }
 			else {
@@ -36,17 +36,14 @@ export function decodeBsv(bytes: Uint8Array): (string | null)[][] {
 	const decoder = new TextDecoder("utf-8", {fatal: true, ignoreBOM: true});
 	const result: (string | null)[][] = [];
 	let currentLine: (string | null)[] = [];
-	let lastIndex = -1;
-	const indexOfLbOrVs = (lastIndex: number) => {
-		let currentIndex = lastIndex;
-		for (;;) {
-			if (currentIndex >= bytes.length) { return -1; }
-			if (bytes[currentIndex] >= 0xFE) { return currentIndex; }
-			currentIndex++;
-		}
-	};
+	let currentIndex = -1;
 	for (;;) {
-		const currentIndex = indexOfLbOrVs(lastIndex+1);
+		const lastIndex = currentIndex;
+		for (;;) {
+			currentIndex++;
+			if (currentIndex >= bytes.length) { currentIndex = -1; break; }
+			if (bytes[currentIndex] >= 0xFE) { break; }
+		}
 		const valueBytes = bytes.subarray(lastIndex+1, currentIndex < 0 ? undefined : currentIndex);
 		if (valueBytes.length === 1 && valueBytes[0] === 0xFD) { currentLine.push(null); }
 		else if (valueBytes.length === 1 && valueBytes[0] === 0xFC) { currentLine.push(""); }
@@ -57,7 +54,6 @@ export function decodeBsv(bytes: Uint8Array): (string | null)[][] {
 			result.push(currentLine);
 			currentLine = [];
 		}
-		lastIndex = currentIndex;
 	}
 	result.push(currentLine);
 	return result;

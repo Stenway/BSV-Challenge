@@ -13,14 +13,14 @@ static byte[] EncodeBsv(string?[][] jaggedArray) {
 	var nullValueByte = new byte[]{0xFD};
 	var emptyStringByte = new byte[]{0xFC};
 	var encoder = new UTF8Encoding(false, true);
-	var wasFirstLine = true;
+	var isFirstLine = true;
 	foreach (var line in jaggedArray) {
-		if (wasFirstLine == false) { parts.Add(lineBreakByte); }
-		wasFirstLine = false;
-		var wasFirstValue = true;
+		if (isFirstLine == false) { parts.Add(lineBreakByte); }
+		isFirstLine = false;
+		var isFirstValue = true;
 		foreach (var value in line) {
-			if (wasFirstValue == false) { parts.Add(valueSeparatorByte); }
-			wasFirstValue = false;
+			if (isFirstValue == false) { parts.Add(valueSeparatorByte); }
+			isFirstValue = false;
 			if (value == null) { parts.Add(nullValueByte); }
 			else if (value.Length == 0) { parts.Add(emptyStringByte); }
 			else { parts.Add(encoder.GetBytes(value)); }
@@ -36,17 +36,14 @@ static string?[][] DecodeBsv(byte[] bytes) {
 	var decoder = new UTF8Encoding(false, true);
 	var result = new List<string?[]>();
 	var currentLine = new List<string?>();
-	var lastIndex = -1;
-	var indexOfLbOrVs = (int lastIndex) => {
-		var currentIndex = lastIndex;
-		for (;;) {
-			if (currentIndex >= bytes.Length) { return -1; }
-			if (bytes[currentIndex] >= 0xFE) { return currentIndex; }
-			currentIndex++;
-		}
-	};
+	var currentIndex = -1;
 	for (;;) {
-		var currentIndex = indexOfLbOrVs(lastIndex+1);
+		var lastIndex = currentIndex;
+		for (;;) {
+			currentIndex++;
+			if (currentIndex >= bytes.Length) { currentIndex = -1; break; }
+			if (bytes[currentIndex] >= 0xFE) { break; }
+		}
 		var valueBytes = currentIndex < 0 ? bytes.Skip(lastIndex+1).ToArray() : bytes.Skip(lastIndex+1).Take(currentIndex-lastIndex-1).ToArray();
 		if (valueBytes.Length == 1 && valueBytes[0] == 0xFD) { currentLine.Add(null); }
 		else if (valueBytes.Length == 1 && valueBytes[0] == 0xFC) { currentLine.Add(""); }
@@ -57,7 +54,6 @@ static string?[][] DecodeBsv(byte[] bytes) {
 			result.Add(currentLine.ToArray());
 			currentLine.Clear();
 		}
-		lastIndex = currentIndex;
 	}
 	result.Add(currentLine.ToArray());
 	return result.ToArray();
@@ -76,19 +72,14 @@ static string?[][] LoadBsv(string filePath) {
 static void AppendBsv(string?[][] jaggedArray, string filePath) {
 	var openFile = () => {
 		try { return (File.Open(filePath, FileMode.Open, FileAccess.Write), true); }
-		catch (Exception exception) {
-			if (exception is FileNotFoundException) { return (File.Open(filePath, FileMode.CreateNew, FileAccess.Write), false); }
-			else { throw exception; }
-		}
+		catch (FileNotFoundException exception) { return (File.Open(filePath, FileMode.CreateNew, FileAccess.Write), false); }
 	};
 	var (handle, existed) = openFile();
 	try {
 		handle.Position = handle.Length;
 		if (existed == true) { handle.Write(new byte[]{0xFF}); }
 		handle.Write(EncodeBsv(jaggedArray));
-	} finally {
-		handle.Close();
-	}
+	} finally { handle.Close(); }
 }
 
 // ----------------------------------------------------------------------
