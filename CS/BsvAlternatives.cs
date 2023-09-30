@@ -1,4 +1,6 @@
-﻿static IEnumerable<byte[]> SplitBytes(byte[] bytes, byte splitByte) {
+﻿/* (C) Stefan John / Stenway / Stenway.com / 2023 */
+
+static IEnumerable<byte[]> SplitBytes(byte[] bytes, byte splitByte) {
 	var lastIndex = -1;
 	for (;;) {
 		var currentIndex = Array.IndexOf(bytes, splitByte, lastIndex+1);

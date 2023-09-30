@@ -1,4 +1,5 @@
-﻿#nullable enable
+﻿/* (C) Stefan John / Stenway / Stenway.com / 2023 */
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ static byte[] EncodeBsv(string?[][] jaggedArray) {
 	}
 	var result = new byte[parts.Sum(part => part.Length)];
 	var stream = new MemoryStream(result);
-    foreach (var part in parts) { stream.Write(part, 0, part.Length); }
+	foreach (var part in parts) { stream.Write(part, 0, part.Length); }
 	return result;
 }
 
