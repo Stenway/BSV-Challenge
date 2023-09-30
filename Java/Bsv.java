@@ -122,7 +122,7 @@ class Bsv {
 				if (!isFirst) { sb.append(", "); }
 				isFirst = false;
 				if (value == null) { sb.append("null"); }
-				else { sb.append("\""+value+"\""); }
+				else { sb.append("\""+value.replace("\n", "\\n").replace("\0", "\\0")+"\""); }
 			}
 			sb.append("]");
 		}
@@ -132,7 +132,7 @@ class Bsv {
 	
 	public static void main(String[] args) {
 		try {
-			String[][] jaggedArray = {{"Hello", "\uD83C\uDF0E", null, ""}, {"Test\uD834\uDD1E"}};
+			String[][] jaggedArray = {{"Hello", "\uD83C\uDF0E", null, ""}, {"A\0B\nC", "Test \uD834\uDD1E"}};
 			saveBsv(jaggedArray, "Test.bsv");
 			String[][] loadedJaggedArray = load("Test.bsv");
 			System.out.println(jaggedArrayToString(loadedJaggedArray));

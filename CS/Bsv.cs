@@ -89,24 +89,30 @@ static string ByteArrayToString(byte[] bytes) {
 }
 
 static string JaggedArrayToString(string?[][] jaggedArray) {
-	return "[\n"+String.Join("\n", jaggedArray.Select((line) => "  ["+String.Join(", ", line.Select(x => x == null ? "null" : "\""+x+"\""))+"]"))+"\n]";
+	return "[\n"+String.Join("\n", jaggedArray.Select((line) => "  ["+String.Join(", ", line.Select(x => x == null ? "null" : "\""+x.Replace("\n", "\\n").Replace("\0", "\\0")+"\""))+"]"))+"\n]";
+}
+
+static void PrintJaggedArray(string?[][] jaggedArray) {
+	Console.WriteLine(JaggedArrayToString(jaggedArray));
 }
 
 string?[][] jaggedArray = new []{
 	new []{"Hello", "🌎", null, ""},
-	new []{"Test 𝄞"}
+	new []{"A\0B\nC", "Test 𝄞"}
 };
 
-Console.WriteLine(JaggedArrayToString(jaggedArray));
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+PrintJaggedArray(jaggedArray);
 var bytes = EncodeBsv(jaggedArray);
 Console.WriteLine(ByteArrayToString(bytes));
 
 var decoded = DecodeBsv(bytes);
-Console.WriteLine(JaggedArrayToString(jaggedArray));
+PrintJaggedArray(jaggedArray);
 
 SaveBsv(jaggedArray, "Test.bsv");
 var loaded = LoadBsv("Test.bsv");
-Console.WriteLine(JaggedArrayToString(jaggedArray));
+PrintJaggedArray(jaggedArray);
 
 AppendBsv(new []{new []{"ABC"}}, "Append.bsv");
 

@@ -5,6 +5,7 @@ const bNV = 0xFD;
 const bES = 0xFC;
 const bA = 0x41;
 const bB = 0x42;
+const bC = 0x43;
 describe("decodeBsv + encodeBsv", () => {
     test.each([
         [[], [[]]],
@@ -26,6 +27,7 @@ describe("decodeBsv + encodeBsv", () => {
         [[0xEF, 0xBB, 0xBF, 0xEF, 0xBB, 0xBF], [["\uFEFF\uFEFF"]]],
         [[0xEF, 0xBB, 0xBF, bA], [["\uFEFFA"]]],
         [[0xF0, 0x9D, 0x84, 0x9E], [["𝄞"]]],
+        [[bA, 0x00, bB, 0x0A, bC], [["A\0B\nC"]]],
         [[0xC2, 0xA5, 0xC3, 0xA4, 0xE2, 0x82, 0xAC, 0xE6, 0x9D, 0xB1], [["¥ä€東"]]],
         [Array(10000).fill(bA), [["A".repeat(10000)]]],
     ])("%p is %p", (input, output) => {

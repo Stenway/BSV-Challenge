@@ -67,7 +67,7 @@ def append_bsv(jagged_array: list[list[str | None]], filePath: str):
 
 def main():
 	print("------------")
-	jagged_array = [["Hello", "🌎", None, ""], ["Test 𝄞"]]
+	jagged_array = [["Hello", "🌎", None, ""], ["A\0B\nC", "Test 𝄞"]]
 	print(jagged_array)
 	
 	encoded_bytes = encode_bsv(jagged_array)
