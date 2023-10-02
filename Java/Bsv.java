@@ -71,7 +71,7 @@ class Bsv {
 			else if (valueBytes.capacity() >= 1) {
 				try { currentLine.add(decoder.decode(valueBytes).toString()); }
 				catch (Exception e) { throw new RuntimeException("Invalid string value", e); }
-			} else if ((((currentIndex >= 0 && bytes[currentIndex] == 0xFF) || (currentIndex < 0)) && ((lastIndex < 0) || (lastIndex >= 0 && bytes[lastIndex] == 0xFF))) == false) { throw new RuntimeException("Invalid BSV value byte sequence"); }
+			} else if ((((currentIndex >= 0 && bytes[currentIndex] == (byte)0xFF) || (currentIndex < 0)) && ((lastIndex < 0) || (lastIndex >= 0 && bytes[lastIndex] == (byte)0xFF))) == false) { throw new RuntimeException("Invalid BSV value byte sequence"); }
 			if (currentIndex < 0) { break; }
 			else if (currentIndex >= 0 && bytes[currentIndex] == (byte)0xFF) {
 				result.add(currentLine.toArray(new String[0]));
