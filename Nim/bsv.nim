@@ -79,6 +79,7 @@ proc decodeBsv(bytes: string): seq[seq[Option[string]]] =
         elif valueBytes.len >= 1:
             if isValidUtf8(valueBytes) == false: raise newException(ValueError, "Invalid string value")
             currentLine.add(some(valueBytes))
+        elif (((currentIndex >= 0 and bytes[currentIndex].byte == 0xFF) or (currentIndex < 0)) and ((lastIndex < 0) or (lastIndex >= 0 and bytes[lastIndex].byte == 0xFF))) == false: raise newException(ValueError, "Invalid BSV value byte sequence")
         if currentIndex < 0: break
         elif currentIndex >= 0 and bytes[currentIndex].byte == 0xFF:
             result.add(currentLine)
