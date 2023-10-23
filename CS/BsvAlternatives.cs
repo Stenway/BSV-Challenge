@@ -15,11 +15,8 @@ static IEnumerable<byte[]> SplitBytes(byte[] bytes, byte splitByte) {
 }
 
 static string?[][] DecodeBsv(byte[] bytes) {
-	if (bytes.Length < 3 || bytes[0] != 0x42 || bytes[1] != 0x53 || bytes[2] != 0x56) {
-		throw new Exception("No valid BSV preamble");
-	}
 	var decoder = new UTF8Encoding(true, true);
-	return splitBytes(bytes.Take(3).ToArray(), 0xFF).Select((lineBytes) => lineBytes.Length == 0 ? new string?[0] :
+	return splitBytes(bytes, 0xFF).Select((lineBytes) => lineBytes.Length == 0 ? new string?[0] :
 		splitBytes(lineBytes, 0xFE).Select((valueBytes) => {
 			if (valueBytes.Length == 0) { throw new Exception("Invalid BSV value byte sequence"); }
 			if (valueBytes.Length == 1) {

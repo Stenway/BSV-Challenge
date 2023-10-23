@@ -108,12 +108,12 @@ PrintJaggedArray(jaggedArray);
 var bytes = EncodeBsv(jaggedArray);
 Console.WriteLine(ByteArrayToString(bytes));
 
-var decoded = DecodeBsv(bytes);
-PrintJaggedArray(jaggedArray);
+var decodedJaggedArray = DecodeBsv(bytes);
+PrintJaggedArray(decodedJaggedArray);
 
 SaveBsv(jaggedArray, "Test.bsv");
-var loaded = LoadBsv("Test.bsv");
-PrintJaggedArray(jaggedArray);
+var loadedJaggedArray = LoadBsv("Test.bsv");
+PrintJaggedArray(loadedJaggedArray);
 
 AppendBsv(new []{new []{"ABC"}}, "Append.bsv");
 
