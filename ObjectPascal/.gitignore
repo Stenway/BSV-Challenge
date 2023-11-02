@@ -1,0 +1,7 @@
+﻿*.bsv
+*.exe
+*.o
+*.lpi
+*.lps
+backup
+lib
