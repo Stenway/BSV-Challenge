@@ -89,7 +89,7 @@ class Bsv {
 		Files.write(Paths.get(filePath), encodeBsv(jaggedArray));
 	}
 	
-	static String[][] load(String filePath) throws IOException {
+	static String[][] loadBsv(String filePath) throws IOException {
 		Objects.requireNonNull(filePath);
 		return decodeBsv(Files.readAllBytes(Paths.get(filePath)));
 	}
@@ -134,7 +134,7 @@ class Bsv {
 		try {
 			String[][] jaggedArray = {{"Hello", "\uD83C\uDF0E", null, ""}, {"A\0B\nC", "Test \uD834\uDD1E"}};
 			saveBsv(jaggedArray, "Test.bsv");
-			String[][] loadedJaggedArray = load("Test.bsv");
+			String[][] loadedJaggedArray = loadBsv("Test.bsv");
 			System.out.println(jaggedArrayToString(loadedJaggedArray));
 			
 			appendBsv(new String[][]{{"ABC"}}, "Append.bsv");
