@@ -1,4 +1,6 @@
-﻿import Foundation
+﻿/* (C) Stefan John / Stenway / Stenway.com / 2023 */
+
+import Foundation
 
 func encodeBsv(_ jaggedArray: [[String?]]) -> [UInt8] {
 	var result: [UInt8] = []
@@ -67,6 +69,8 @@ func decodeBsv(_ bytes: [UInt8]) -> [[String?]] {
 	return result
 }
 
+// ----------------------------------------------------------------------
+
 func saveBsv(_ jaggedArray: [[String?]], _ filePath: String) throws {
 	let bytes = encodeBsv(jaggedArray)
 	let data = Data(bytes)
@@ -77,6 +81,8 @@ func loadBsv(_ filePath: String) throws -> [[String?]] {
 	let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
 	return decodeBsv([UInt8](data))
 }
+
+// ----------------------------------------------------------------------
 
 func jaggedArrayToString(_ jaggedArray: [[String?]]) -> String {
 	var sb = ""
@@ -98,6 +104,8 @@ func jaggedArrayToString(_ jaggedArray: [[String?]]) -> String {
 	sb.append("\n]")
 	return sb
 }
+
+// ----------------------------------------------------------------------
 
 let jaggedArray: [[String?]] = [
 	["Hello", "🌎", nil, ""],
